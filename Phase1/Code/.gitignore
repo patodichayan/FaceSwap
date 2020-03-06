@@ -1,8 +1,8 @@
 # ignore dlib model
-dlib_model/
+dlib_model
 
 # ignore ipython files
 *.ipynb
 
 # ignore ipython checkpoints
-.ipynb_checkpoints/
+.ipynb_checkpoints
