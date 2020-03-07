@@ -3,22 +3,9 @@ import dlib
 import numpy as np
 import copy
 
+landmark_coord = np.zeros((68, 2), dtype='int')
 
-def get_facial_landmarks(img=None):
-    
-    if(img==None):
-        # load image
-        file_path = '../../Data/'
-        cap = cv2.VideoCapture(file_path+'saket3.mp4')
-        # while(True):
-        ret, img = cap.read()
-        # cv2.imshow('sak', img)
-        #     cv2.waitKey(2)
-        #     if cv2.waitKey(1) & 0xFF == ord('q'):
-        #         break
-        # cv2.waitKey(0)
-        # cap.release()
-        # cv2.destroyAllWindows()
+def get_facial_landmarks(img):
         
     # load shape predictor model
     model_path = 'dlib_model/shape_predictor_68_face_landmarks.dat'
@@ -36,7 +23,7 @@ def get_facial_landmarks(img=None):
         landmarks = predictor(img_gray, rect)
 
         # reshape landmarks to (68X2)
-        landmark_coord = np.zeros((68, 2), dtype='int')
+        # landmark_coord = np.zeros((68, 2), dtype='int')
 
         for i in range(68):
             landmark_coord[i] = (landmarks.part(i).x, landmarks.part(i).y)
@@ -62,4 +49,4 @@ def get_facial_landmarks(img=None):
         cv2.polylines(img_, [eye_right], False, (0, 255, 0), 1)
         cv2.polylines(img_, [lips], False, (0, 255, 0), 1)
 
-    return img_
+    return img_ , landmark_coord

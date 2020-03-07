@@ -41,7 +41,7 @@ def main():
 			break
 		
 		frame, features = get_facial_landmarks(frame)
-		print(features)		
+		#print(features)		
 		cv2.imshow("",frame)
 		cv2.waitKey(50)
 	cap.release()
