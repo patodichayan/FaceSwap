@@ -1,17 +1,10 @@
 import numpy as np
 import cv2
-
+import math
 
 def U(r):
+	return (r**2)*(math.log(r**2))
 
-
-	sq = np.square(r)
-	U = sq * np.log(sq)
-	
-	if np.isnan(U) == True:
-		return 0
-	else:	
-		return U
 
  
 	
