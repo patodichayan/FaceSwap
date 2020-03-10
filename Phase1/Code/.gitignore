@@ -6,3 +6,7 @@ dlib_model
 
 # ignore ipython checkpoints
 .ipynb_checkpoints
+
+# ignore image files
+*.jpg
+
