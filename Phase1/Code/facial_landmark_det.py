@@ -3,7 +3,7 @@ import dlib
 import numpy as np
 import copy
 
-landmark_coord = np.zeros((68, 2), dtype='int')
+# landmark_coord = np.zeros((68, 2), dtype='int')
 
 def get_facial_landmarks(img):
         
@@ -19,13 +19,14 @@ def get_facial_landmarks(img):
     img_gray = cv2.cvtColor(img_, cv2.COLOR_BGR2GRAY)
     rects = detector(img_gray, 1)
 
+    # landmarks shape is (68X2)
+    landmark_coord = np.zeros((68, 2), dtype='int')
+
     for i, rect in enumerate(rects):
         landmarks = predictor(img_gray, rect)
 
-        # reshape landmarks to (68X2)
-        # landmark_coord = np.zeros((68, 2), dtype='int')
-
         for i in range(68):
+            
             landmark_coord[i] = (landmarks.part(i).x, landmarks.part(i).y)
 
         # draw bounding box on face
@@ -48,5 +49,8 @@ def get_facial_landmarks(img):
         cv2.polylines(img_, [eye_left], False, (0, 255, 0), 1)
         cv2.polylines(img_, [eye_right], False, (0, 255, 0), 1)
         cv2.polylines(img_, [lips], False, (0, 255, 0), 1)
+    # cv2.imshow("",img_)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
-    return img_ , landmark_coord
+    return img , landmark_coord , len(rects)
