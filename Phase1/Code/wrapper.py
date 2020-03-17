@@ -26,7 +26,9 @@ import copy
 import dlib
 from facial_landmark_det import get_facial_landmarks
 from warp_spline import*
-from pb import*
+from video import*
+#from pb import*
+
 
 # Add any python libraries here
 
@@ -36,7 +38,7 @@ from pb import*
 def main():
 
 	Parser = argparse.ArgumentParser()
-	Parser.add_argument('--video', default='../../Data/Video1.mp4', help='Provide Video Name with path here')
+	Parser.add_argument('--video', default='../../Data/Video2.mp4', help='Provide Video Name with path here')
 	Parser.add_argument('--target',default = '../../Data/Video5.mp4',help='Provide Image to be swapped in the image.')
 	Parser.add_argument('--mode',default = 'tps',help='Provide Method of image transformation: delaunay(deln), TPS(tps)')
 
@@ -78,11 +80,16 @@ def main():
 		parametersy = estimate_parameters(features1,features2,"y")
 
 		result = tps(img,frame,features1,features2,parametersx,parametersy)
-		cv2.imwrite("Frame{}.png".format(count),result)
+
+		if not os.path.exists('../Frames'):
+		    os.makedirs('../Frames')
+		
+		cv2.imwrite("../Frames/Frame{}.png".format(count),result)
+
 		
 		# cv2.imshow("",result)
 		# cv2.waitKey(50)
-		
+	convert()
 	cap.release()
 	cv2.destroyAllWindows()
 		
