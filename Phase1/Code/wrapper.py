@@ -1,73 +1,101 @@
-import cv2
-import numpy as np
-import copy
-import random
+#!/usr/bin/evn python
 
+"""
+CMSC733 Spring 2020: Classical and Deep Learning Approaches for
+Geometric Computer Vision
+Project2: : FaceSwap.
+
+Author(s): 
+Chayan Kumar Patodi (ckp1804@terpmail.umd.edu)
+University of Maryland, College Park
+
+Saket Seshadri Gudimetla Hanumath (saketsgh@umd.edu)
+University of Maryland, College Park
+"""
+
+# Code starts here:
+
+import numpy as np
+import cv2
+from glob import glob
+import argparse
+import os
+import matplotlib.pyplot as plt
+import random
+import copy
+import dlib
+from facial_landmark_det import get_facial_landmarks
+from warp_spline import*
+from video import*
 from warp_triangulation import SwapFaceWithImg, SwapTwoFacesInVid, showImage
 
+#from pb import*
+
+
+# Add any python libraries here
+
+#Helping Functions.
+
+
 def main():
-    FilePathTestSet = '../../Data/TestSet_P2/'
-    FilePathCustomSet = '../../Data/'
-    Test1 = cv2.VideoCapture(FilePathTestSet+'Test1.mp4')
-    Test2 = cv2.VideoCapture(FilePathTestSet+'Test2.mp4')
-    Test3 = cv2.VideoCapture(FilePathTestSet+'Test3.mp4')
-    CustomSet = cv2.VideoCapture(FilePathCustomSet+'Video9.mp4')
-    # Define the codec and create VideoWriter object
-    #     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    #     out = cv2.VideoWriter('FaceSwap.avi',fourcc, 24.0, (640,480), True)
-    SwapFaceWithImg_ = False
-    rambo = cv2.imread('../../Data/TestSet_P2/Rambo.jpg')
-    scarlett = cv2.imread('../../Data/TestSet_P2/Scarlett.jpg')
-    i = 0
-    frameCount = 0
 
-    
-    if(SwapFaceWithImg_):
-        while(Test3.isOpened()):
-            print("frame - {}".format(frameCount))
-            ret, img = Test3.read()
-            if ret==True:
-                swapImg, OneFaceDetected = SwapFaceWithImg(img, scarlett)
-                # if two faces not found then drop the current frame 
-                if(not OneFaceDetected):
-                    frameCount += 1
-                    continue
-                else:
-    #                     showImage(swapImg)
-                    cv2.imwrite("results/Test3/img"+str(i)+".png", swapImg)
-                    #out.write(swapImg)
-                    i+=1
-                    frameCount+=1
-            else:
-                break
-    #         if cv2.waitKey(1) & 0xFF == ord('q'):
-    #             break
-        Test3.release()
-    #     out.release()
-        cv2.destroyAllWindows()
-        print("done")
+	Parser = argparse.ArgumentParser()
+	Parser.add_argument('--video', default='../../Data/Video2.mp4', help='Provide Video Name with path here')
+	Parser.add_argument('--target',default = '../../Data/Video5.mp4',help='Provide Image to be swapped in the image.')
+	Parser.add_argument('--mode',default = 'tps',help='Provide Method of image transformation: delaunay(deln), TPS(tps)')
 
-    else:
-        while(Test2.isOpened()):
-            print("frame - {}".format(frameCount))
-            ret, img = Test2.read()
-    #             img = cv2.flip(img, 0)
-            if ret==True:
-                swapImg, TwoFacesDetected = SwapTwoFacesInVid(img)
-                # if two faces not found then drop the current frame 
-                if(not TwoFacesDetected):
-                    frameCount += 1
-                    continue
-                else:
-                    showImage(swapImg)
-                    cv2.imwrite("results/Test2/img"+str(i)+".png", swapImg)
-                    i+=1
-                    frameCount += 1
-            else:
-                break
-        Test2.release()
-        cv2.destroyAllWindows()
-        print("done")
+	Args = Parser.parse_args()
+	Video = Args.video
+	Target = Args.target
+	Mode = Args.mode
 
+	cap = cv2.VideoCapture(Video)
+
+	print("Number of Frames in the Video:" , int(cap.get(cv2.cv2.CAP_PROP_FRAME_COUNT)))
+	
+	#As of now working for single target image and 1 source video , thus outside loop.
+
+	_, img = (cv2.VideoCapture(Target)).read()
+	#img = cv2.imread("../../Data/stark.jpg")
+	#img = automatic_brightness_and_contrast(img)
+	image, features1 , faces1 = get_facial_landmarks(img)
+
+
+	count = 0
+	while (cap.isOpened()):
+		ret, frame = cap.read()
+		if ret == False:
+			break
+
+		
+		frame, features2, faces2 = get_facial_landmarks(frame)
+		#frame = automatic_brightness_and_contrast(frame)
+		count = count+1		
+		
+		if faces2 !=1:
+			print("Not enough keypoints to determine the face")
+			continue
+
+		print("frame{}".format(count))
+
+		parametersx = estimate_parameters(features1,features2,"x")
+		parametersy = estimate_parameters(features1,features2,"y")
+
+		result = tps(img,frame,features1,features2,parametersx,parametersy)
+
+		if not os.path.exists('../Frames'):
+		    os.makedirs('../Frames')
+		
+		cv2.imwrite("../Frames/Frame{}.png".format(count),result)
+
+		
+		# cv2.imshow("",result)
+		# cv2.waitKey(50)
+	convert()
+	cap.release()
+	cv2.destroyAllWindows()
+		
+		
 if __name__ == '__main__':
-	main()
+  main()
+

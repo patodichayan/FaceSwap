@@ -43,7 +43,7 @@ def getFacialLandmarks(img_=None):
 
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     rects = detector(img_gray, 1)
-    
+
     # store landmark locations of both faces
     landmark_coord_all = []
     
@@ -54,7 +54,14 @@ def getFacialLandmarks(img_=None):
         # reshape landmarks to (68X2)
         landmark_coord = np.zeros((68, 2), dtype='int')
 
+    # landmarks shape is (68X2)
+    landmark_coord = np.zeros((68, 2), dtype='int')
+
+    for i, rect in enumerate(rects):
+        landmarks = predictor(img_gray, rect)
+
         for i in range(68):
+            
             landmark_coord[i] = (landmarks.part(i).x, landmarks.part(i).y)
         landmark_coord_all.append(landmark_coord)
         
