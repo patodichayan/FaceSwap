@@ -4,15 +4,15 @@ import numpy as np
 import copy
 
 
-def draw_facial_landmarks(img, landmark_coord):
+def drawFacialLandmarks(img, landmarkCoord):
     
-    jaw = landmark_coord[0:17]
-    left_ebrow = landmark_coord[17:22]
-    right_ebrow = landmark_coord[22:27]
-    nose = landmark_coord[27:36]
-    eye_left = landmark_coord[36:42]
-    eye_right = landmark_coord[42:48]
-    lips = landmark_coord[48:]
+    jaw = landmarkCoord[0:17]
+    left_ebrow = landmarkCoord[17:22]
+    right_ebrow = landmarkCoord[22:27]
+    nose = landmarkCoord[27:36]
+    eye_left = landmarkCoord[36:42]
+    eye_right = landmarkCoord[42:48]
+    lips = landmarkCoord[48:]
 
     cv2.polylines(img, [jaw], False, (0, 255, 0), 1)
     cv2.polylines(img, [left_ebrow], False, (0, 255, 0), 1)
@@ -24,15 +24,15 @@ def draw_facial_landmarks(img, landmark_coord):
     
     return img
     
-def get_facial_landmarks(img=None):
+def getFacialLandmarks(img_=None):
     
-    if(img is None):    
+    if(img_ is None):    
         # load image
         file_path = '../../Data/'
         cap = cv2.VideoCapture(file_path+'saket3.mp4')
         ret, img = cap.read()
     
-        
+    img = copy.deepcopy(img_)    
     # load shape predictor model
     model_path = 'dlib_model/shape_predictor_68_face_landmarks.dat'
 
@@ -62,6 +62,6 @@ def get_facial_landmarks(img=None):
         cv2.rectangle(img, (rect.left(), rect.top()), (rect.right(), rect.bottom()), (0, 255, 255), 0)
 
         # draw facial landmarks
-        img_ = draw_facial_landmarks(img, landmark_coord)
+        img_ = drawFacialLandmarks(img, landmark_coord)
         
     return img_, landmark_coord_all

@@ -3,46 +3,71 @@ import numpy as np
 import copy
 import random
 
-from warp_triangulation import draw_triangles, triangulation
-from facial_landmark_det import get_facial_landmarks
+from warp_triangulation import SwapFaceWithImg, SwapTwoFacesInVid, showImage
 
 def main():
+    FilePathTestSet = '../../Data/TestSet_P2/'
+    FilePathCustomSet = '../../Data/'
+    Test1 = cv2.VideoCapture(FilePathTestSet+'Test1.mp4')
+    Test2 = cv2.VideoCapture(FilePathTestSet+'Test2.mp4')
+    Test3 = cv2.VideoCapture(FilePathTestSet+'Test3.mp4')
+    CustomSet = cv2.VideoCapture(FilePathCustomSet+'Video9.mp4')
+    # Define the codec and create VideoWriter object
+    #     fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    #     out = cv2.VideoWriter('FaceSwap.avi',fourcc, 24.0, (640,480), True)
+    SwapFaceWithImg_ = False
+    rambo = cv2.imread('../../Data/TestSet_P2/Rambo.jpg')
+    scarlett = cv2.imread('../../Data/TestSet_P2/Scarlett.jpg')
+    i = 0
+    frameCount = 0
 
-	file_path = '../../Data/'
-	cap = cv2.VideoCapture(file_path+'together5.mp4')
-	# while(True):
-	ret, img = cap.read()
-	img_copy = copy.deepcopy(img)
+    
+    if(SwapFaceWithImg_):
+        while(Test3.isOpened()):
+            print("frame - {}".format(frameCount))
+            ret, img = Test3.read()
+            if ret==True:
+                swapImg, OneFaceDetected = SwapFaceWithImg(img, scarlett)
+                # if two faces not found then drop the current frame 
+                if(not OneFaceDetected):
+                    frameCount += 1
+                    continue
+                else:
+    #                     showImage(swapImg)
+                    cv2.imwrite("results/Test3/img"+str(i)+".png", swapImg)
+                    #out.write(swapImg)
+                    i+=1
+                    frameCount+=1
+            else:
+                break
+    #         if cv2.waitKey(1) & 0xFF == ord('q'):
+    #             break
+        Test3.release()
+    #     out.release()
+        cv2.destroyAllWindows()
+        print("done")
 
-	# load the image and calculate facial landmarks using dlib
-	face_ldmrk_img, landmark_coord_all = get_facial_landmarks(img)
-
-	# display the facial landmarks
-	cv2.imshow("OP_face_ldmrk", face_ldmrk_img)
-
-	# perform triangulation on 1st face and gather their locations in the landmark_coord array
-	triang_fc1_img, triangleIdList = triangulation(img_copy, landmark_coord_all[0])
-
-	# show the output image with the delaunay triangulation on face 1
-	cv2.imshow("OP_delaunay_fc1", triang_fc1_img)
-
-	# retrieve the locations of the triangles in the second face
-	triangleList = []
-	for t in triangleIdList:
-	    p1_id, p2_id, p3_id = t[0], t[1], t[2]
-	    pt1 = landmark_coord_all[1][p1_id][0]
-	    pt2 = landmark_coord_all[1][p2_id][0]
-	    pt3 = landmark_coord_all[1][p3_id][0]
-
-	    triangleList.append([pt1[0], pt1[1], pt2[0], pt2[1], pt3[0], pt3[1]])
-
-	# draw triangles on face2
-	triang_fc2_img = draw_triangles(triang_fc1_img, triangleList, face2=True, landmark_coord=None)
-
-	# show the output image with the delaunay triangulation
-	cv2.imshow("OP_delaunay_fc12", triang_fc2_img)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+    else:
+        while(Test2.isOpened()):
+            print("frame - {}".format(frameCount))
+            ret, img = Test2.read()
+    #             img = cv2.flip(img, 0)
+            if ret==True:
+                swapImg, TwoFacesDetected = SwapTwoFacesInVid(img)
+                # if two faces not found then drop the current frame 
+                if(not TwoFacesDetected):
+                    frameCount += 1
+                    continue
+                else:
+                    showImage(swapImg)
+                    cv2.imwrite("results/Test2/img"+str(i)+".png", swapImg)
+                    i+=1
+                    frameCount += 1
+            else:
+                break
+        Test2.release()
+        cv2.destroyAllWindows()
+        print("done")
 
 if __name__ == '__main__':
 	main()
