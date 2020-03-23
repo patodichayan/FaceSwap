@@ -10,3 +10,7 @@ dlib_model
 # ignore image files
 *.jpg
 
+# ignore python compiled files.
+*.pyc
+
+
