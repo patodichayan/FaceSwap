@@ -86,21 +86,23 @@ def blend(img1,img2,hull):
     return output
 
 
-def tps(img1,img2,points1,points2,x_params,y_params):
+def tps(img1,img2,points1,points2):
+
+	parametersx = estimate_parameters(points1,points2,"x")
+	parametersy = estimate_parameters(points1,points2,"y")
 
 	img2_copy = copy.deepcopy(img2)
 	p = len(points1)
 	r = cv2.boundingRect(np.float32([points2]))
 	mask, hull = generate_mask(img2,points2,r)
 
-	
-	a1_x = x_params[p+2]
-	a2_x = x_params[p+1]
-	a3_x = x_params[p]
+	a1_x = parametersx[p+2]
+	a2_x = parametersx[p+1]
+	a3_x = parametersx[p]
 
-	a1_y = y_params[p+2]
-	a2_y = y_params[p+1]
-	a3_y = y_params[p]
+	a1_y = parametersy[p+2]
+	a2_y = parametersy[p+1]
+	a3_y = parametersy[p]
 
 
 	#Creating the image for face that has to be swapped.
@@ -118,8 +120,8 @@ def tps(img1,img2,points1,points2,x_params,y_params):
 				# epsilon is used to avoid NAN situations.
 
 				a = points2[k,:]
-				t = t+x_params[k]*(U(np.linalg.norm((a-b),ord =2)+sys.float_info.epsilon))
-				l = l+y_params[k]*(U(np.linalg.norm((a-b),ord =2)+sys.float_info.epsilon))
+				t = t+parametersx[k]*(U(np.linalg.norm((a-b),ord =2)+sys.float_info.epsilon))
+				l = l+parametersy[k]*(U(np.linalg.norm((a-b),ord =2)+sys.float_info.epsilon))
 
 			x = int(a1_x + a3_x*n + a2_x*m + t)
 			y = int(a1_y + a3_y*n + a2_y*m + l)
