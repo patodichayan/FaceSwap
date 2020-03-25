@@ -37,7 +37,7 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
     img = copy.deepcopy(img_)
 
     # use dlib or PrNetfor prediction of facial landmarks 
-    if isDlib:    
+    if isDlib == "True":    
         # load shape predictor model
         model_path = 'dlib_model/shape_predictor_68_face_landmarks.dat'
 
@@ -69,10 +69,10 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
             # draw facial landmarks
             img_ = drawFacialLandmarks(img, landmarkCoord)
 
-    else:
+    if isDlib == "False":
+        print("hi")
         # prn uses dlib for face detection and its own trained model for prediction of facial landmarks
         prn = PRN(is_dlib = True, prefix='prnet/')
-        landmarkCoord = []
 
         [h, w, c] = img.shape
         if c>3:
