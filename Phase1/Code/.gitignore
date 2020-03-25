@@ -7,10 +7,15 @@ dlib_model
 # ignore ipython checkpoints
 .ipynb_checkpoints
 
-# ignore image files
-*.jpg
+# ignore data files of prnet
+net-data
+uv-data
 
 # ignore python compiled files.
 *.pyc
+
+
+
+
 
 
