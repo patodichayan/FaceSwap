@@ -13,7 +13,7 @@ from utils.cv_plot import plot_kpt
 
 
 def drawFacialLandmarks(img, landmarkCoord):
-    
+
     jaw = landmarkCoord[0:17]
     left_ebrow = landmarkCoord[17:22]
     right_ebrow = landmarkCoord[22:27]
@@ -29,29 +29,29 @@ def drawFacialLandmarks(img, landmarkCoord):
     cv2.polylines(img, [eye_left], False, (0, 255, 0), 1)
     cv2.polylines(img, [eye_right], False, (0, 255, 0), 1)
     cv2.polylines(img, [lips], False, (0, 255, 0), 1)
-    
+
     return img
-    
+
 def getFacialLandmarks(isDlib, img_, numFaces=1):
-    
+
     img = copy.deepcopy(img_)
 
-    # use dlib or PrNetfor prediction of facial landmarks 
-    if isDlib == "True":    
+    # use dlib or PrNetfor prediction of facial landmarks
+    if isDlib == "True":
         # load shape predictor model
         model_path = 'dlib_model/shape_predictor_68_face_landmarks.dat'
 
-        # load the detector and the predictor. 
+        # load the detector and the predictor.
         # predictor accepts pre-trained model as input
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor(model_path)
 
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         rects = detector(img_gray, 1)
-        
+
         # store landmark locations of both faces
         landmarkCoordAll = []
-        
+
         # iterate through the points in both faces
         for r, rect in enumerate(rects):
             landmarks = predictor(img_gray, rect)
@@ -62,7 +62,7 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
             for i in range(68):
                 landmarkCoord[i] = (landmarks.part(i).x, landmarks.part(i).y)
             landmarkCoordAll.append(landmarkCoord)
-            
+
             # draw bounding box on face
             cv2.rectangle(img, (rect.left(), rect.top()), (rect.right(), rect.bottom()), (0, 255, 255), 0)
 
@@ -70,7 +70,6 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
             img_ = drawFacialLandmarks(img, landmarkCoord)
 
     if isDlib == "False":
-        print("hi")
         # prn uses dlib for face detection and its own trained model for prediction of facial landmarks
         prn = PRN(is_dlib = True, prefix='prnet/')
 
@@ -86,7 +85,7 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
             for i in range(numFaces):
                 pos = prn.process(img, i)
                 posList.append(pos)
-        
+
         landmarkCoordAll = []
         for i, pos in enumerate(posList):
 
@@ -99,5 +98,5 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
 
             landmarkCoord = landmarkCoord[:, 0:2]
             landmarkCoordAll.append(landmarkCoord)
-    
+
     return img_, landmarkCoordAll
