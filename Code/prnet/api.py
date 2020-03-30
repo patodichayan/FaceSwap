@@ -25,7 +25,7 @@ class PRN:
             self.face_detector = dlib.cnn_face_detection_model_v1(
                     detector_path)
 
-        #---- load PRN 
+        #---- load PRN
         self.pos_predictor = PosPrediction(self.resolution_inp, self.resolution_op)
         prn_path = os.path.join(prefix, 'Data/net-data/256_256_resfcn256_weight')
         if not os.path.isfile(prn_path + '.data-00000-of-00001'):
@@ -37,8 +37,8 @@ class PRN:
         self.uv_kpt_ind = np.loadtxt(prefix + '/Data/uv-data/uv_kpt_ind.txt').astype(np.int32) # 2 x 68 get kpt
         self.face_ind = np.loadtxt(prefix + '/Data/uv-data/face_ind.txt').astype(np.int32) # get valid vertices in the pos map
         self.triangles = np.loadtxt(prefix + '/Data/uv-data/triangles.txt').astype(np.int32) # ntri x 3
-        
-        self.uv_coords = self.generate_uv_coords()        
+
+        self.uv_coords = self.generate_uv_coords()
 
     def generate_uv_coords(self):
         resolution = self.resolution_op
@@ -64,8 +64,8 @@ class PRN:
     def process(self, input, i, image_info = None):
         ''' process image with crop operation.
         Args:
-            input: (h,w,3) array or str(image path). image value range:1~255. 
-            image_info(optional): the bounding box information of faces. if None, will use dlib to detect face. 
+            input: (h,w,3) array or str(image path). image value range:1~255.
+            image_info(optional): the bounding box information of faces. if None, will use dlib to detect face.
 
         Returns:
             pos: the 3D position map. (256, 256, 3).
@@ -87,7 +87,7 @@ class PRN:
                 kpt = image_info
                 if kpt.shape[0] > 3:
                     kpt = kpt.T
-                left = np.min(kpt[0, :]); right = np.max(kpt[0, :]); 
+                left = np.min(kpt[0, :]); right = np.max(kpt[0, :]);
                 top = np.min(kpt[1,:]); bottom = np.max(kpt[1,:])
             else:  # bounding box
                 bbox = image_info
@@ -101,6 +101,8 @@ class PRN:
                 print('warning: no detected face')
                 return None
 
+            if (i == 1) and len(detected_faces) != 2:
+                return None
             d = detected_faces[i].rect ## only use the first detected face (assume that each input image only contains one face)
             left = d.left(); right = d.right(); top = d.top(); bottom = d.bottom()
             old_size = (right - left + bottom - top)/2
@@ -111,7 +113,7 @@ class PRN:
         src_pts = np.array([[center[0]-size/2, center[1]-size/2], [center[0] - size/2, center[1]+size/2], [center[0]+size/2, center[1]-size/2]])
         DST_PTS = np.array([[0,0], [0,self.resolution_inp - 1], [self.resolution_inp - 1, 0]])
         tform = estimate_transform('similarity', src_pts, DST_PTS)
-        
+
         image = image/255.
         cropped_image = warp(image, tform.inverse, output_shape=(self.resolution_inp, self.resolution_inp))
 
@@ -120,16 +122,16 @@ class PRN:
         cropped_pos = self.net_forward(cropped_image)
         #print 'net time:', time() - st
 
-        # restore 
+        # restore
         cropped_vertices = np.reshape(cropped_pos, [-1, 3]).T
         z = cropped_vertices[2,:].copy()/tform.params[0,0]
         cropped_vertices[2,:] = 1
         vertices = np.dot(np.linalg.inv(tform.params), cropped_vertices)
         vertices = np.vstack((vertices[:2,:], z))
         pos = np.reshape(vertices.T, [self.resolution_op, self.resolution_op, 3])
-        
+
         return pos
-            
+
     def get_landmarks(self, pos):
         '''
         Args:
@@ -180,11 +182,3 @@ class PRN:
         colors = image[ind[:,1], ind[:,0], :] # n x 3
 
         return colors
-
-
-
-
-
-
-
-

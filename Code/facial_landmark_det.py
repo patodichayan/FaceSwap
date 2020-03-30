@@ -5,7 +5,7 @@ import copy
 import os
 import sys
 
-sys.path.append("prnet/")
+sys.path.append("Code/prnet/")
 from api import PRN
 from utils.cv_plot import plot_kpt
 
@@ -39,7 +39,7 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
     # use dlib or PrNetfor prediction of facial landmarks
     if isDlib == "True":
         # load shape predictor model
-        model_path = 'dlib_model/shape_predictor_68_face_landmarks.dat'
+        model_path = 'Code/dlib_model/shape_predictor_68_face_landmarks.dat'
 
         # load the detector and the predictor.
         # predictor accepts pre-trained model as input
@@ -71,7 +71,7 @@ def getFacialLandmarks(isDlib, img_, numFaces=1):
 
     if isDlib == "False":
         # prn uses dlib for face detection and its own trained model for prediction of facial landmarks
-        prn = PRN(is_dlib = True, prefix='prnet/')
+        prn = PRN(is_dlib = True, prefix='Code/prnet/')
 
         [h, w, c] = img.shape
         if c>3:

@@ -149,6 +149,7 @@ def swapFaces(img_, srcImg, srcLandmarks, srcTriangles, dstImg, dstTriangles, ds
     x0Src, y0Src, w, h = cv2.boundingRect(srcLandmarks)
 
     warpedImgSrc = np.zeros((img.shape), np.uint8)
+
     # for each triangle in face 2 calculate barycentric coordinates and use those to obtain warped points of face 1 that will be copied to face 2
     for t1, t2 in zip(srcTriangles, dstTriangles):
 
@@ -217,6 +218,7 @@ def getOutsidePts(img, FaceLandmarks):
     # calculate outside points in order to perform face trimming for clean swapping output
     # get convex hull
     convexHullFaceImg, convexhullPtsFace = convexHullFace(img, FaceLandmarks)
+    # showImage(convexHullFaceImg, "convexHull", save=True)
     img_copy = copy.deepcopy(img)
     img_gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
     mask = np.zeros_like(img_gray)
@@ -288,22 +290,25 @@ def SwapTwoFacesInVid(img, landmarkCoordAll):
     outIntensitiesFace1 = img[ptsOutsideFace1[:, 1], ptsOutsideFace1[:, 0]]
     outIntensitiesFace2 = img[ptsOutsideFace2[:, 1], ptsOutsideFace2[:, 0]]
 
-    swap1, warpedImgFace2 = swapFaces(img, imgFace1, landmarksFace1, triangleListFace1, imgFace2, triangleListFace2, landmarksFace2)
+    swap1, warpedImgFace1 = swapFaces(img, imgFace1, landmarksFace1, triangleListFace1, imgFace2, triangleListFace2, landmarksFace2)
     swap1[ptsOutsideFace2[:, 1], ptsOutsideFace2[:, 0]] = outIntensitiesFace2
-    warpedImgFace2[ptsOutsideFace2[:, 1], ptsOutsideFace2[:, 0]] = outIntensitiesFace2
+
 
     # perform seamless cloning
     swap1Cloned = cv2.seamlessClone(np.uint8(swap1), img, mask2, face2Center, cv2.NORMAL_CLONE)
 
-    swap2, warpedImgFace1 = swapFaces(swap1Cloned, imgFace2, landmarksFace2, triangleListFace2, imgFace1, triangleListFace1, landmarksFace1)
+    swap2, warpedImgFace2 = swapFaces(swap1Cloned, imgFace2, landmarksFace2, triangleListFace2, imgFace1, triangleListFace1, landmarksFace1)
     swap2[ptsOutsideFace1[:, 1], ptsOutsideFace1[:, 0]] = outIntensitiesFace1
-    warpedImgFace1[ptsOutsideFace1[:, 1], ptsOutsideFace1[:, 0]] = outIntensitiesFace1
+
+    warpedImgFace2[ptsOutsideFace1[:, 1], ptsOutsideFace1[:, 0]] = 0
+    warpedImgFace1[ptsOutsideFace2[:, 1], ptsOutsideFace2[:, 0]] = 0
 
     # perform seamless cloning
     swap2Cloned = cv2.seamlessClone(swap2, swap1Cloned, mask1, face1Center, cv2.NORMAL_CLONE)
-
-    # showImage(warpedImgFace1, "warpedFace1")
-    # showImage(warpedImgFace2, "warpedFace2")
+    # showImage(imgFace1, "og Face1", save=True)
+    # showImage(imgFace2, "og Face2", save=True)
+    # showImage(warpedImgFace1, "warpedFace1", save=True)
+    # showImage(warpedImgFace2, "warpedFace2", save=True)
 
     return swap2Cloned
 
